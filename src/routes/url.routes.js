@@ -2,7 +2,7 @@ import { Router } from "express";
 import {
   handleGenerateShortUrl,
   handleGetUrls,
-} from "../controllers/url.controller";
+} from "../controllers/url.controller.js";
 
 const urlRouter = Router();
 
