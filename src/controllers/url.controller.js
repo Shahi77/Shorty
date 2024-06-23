@@ -35,4 +35,45 @@ const handleGetUrls = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, urls, "fetched successfully"));
 });
 
-export { handleGenerateShortUrl, handleGetUrls };
+const handleVisitUrl = asyncHandler(async (req, res) => {
+  const { shortId } = req.params;
+
+  const originalUrl = await URL.findOneAndUpdate(
+    { shortId: shortId },
+    {
+      $push: {
+        visitHistory: Date.now(),
+      },
+    }
+  ).select("-_id -shortId -createdAt -updatedAt");
+
+  if (!originalUrl) {
+    throw new ApiError(500, "invalid short url");
+  }
+  return res.redirect(originalUrl.redirectUrl);
+});
+
+const handleGetAnalytics = asyncHandler(async (req, res) => {
+  const { shortId } = req.params;
+  const result = await URL.findOne({ shortId: shortId });
+  if (!result) {
+    throw new ApiError(500, "invalid short url");
+  }
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        totalClicks: result.visitHistory.length,
+        analytics: result.visitHistory,
+      },
+      "analytics fetched successfully"
+    )
+  );
+});
+export {
+  handleGenerateShortUrl,
+  handleGetUrls,
+  handleVisitUrl,
+  handleGetAnalytics,
+};
