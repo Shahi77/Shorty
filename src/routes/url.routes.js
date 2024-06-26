@@ -6,7 +6,6 @@ import {
   handleVisitUrl,
 } from "../controllers/url.controller.js";
 import { verifyJwt } from "../middlewares/auth.middleware.js";
-import { verify } from "jsonwebtoken";
 
 const urlRouter = Router();
 

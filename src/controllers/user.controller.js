@@ -34,7 +34,7 @@ const handleUserSignup = asyncHandler(async (req, res) => {
   }
 
   const existingUser = await User.findOne({ email: email });
-  if (!existingUser) {
+  if (existingUser) {
     throw new ApiError(409, "User with email already exists");
   }
 
@@ -62,8 +62,6 @@ const handleUserSignup = asyncHandler(async (req, res) => {
         201,
         {
           user: createdUser,
-          accessToken,
-          refreshToken,
         },
         "User created successfully"
       )
@@ -86,6 +84,9 @@ const handleUserLogin = asyncHandler(async (req, res) => {
     throw new ApiError(401, "Password incorrect");
   }
 
+  const loggedInUser = await User.findById(user._id).select(
+    "-password -refreshToken"
+  );
   const { accessToken, refreshToken } = await generateTokens(user._id);
   return res
     .status(200)
@@ -95,9 +96,7 @@ const handleUserLogin = asyncHandler(async (req, res) => {
       new ApiResponse(
         200,
         {
-          user,
-          accessToken,
-          refreshToken,
+          loggedInUser,
         },
         "Logged in successfully"
       )
